@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -97,20 +97,13 @@ function LoginForm() {
       >
         {loading ? "Logging in..." : "Log In"}
       </button>
-
-      <p className="text-center text-sm text-gray-400">
-        Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-blue-400 hover:underline">
-          Sign up
-        </Link>
-      </p>
     </form>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen px-4">
       <Suspense>
         <LoginForm />
       </Suspense>
