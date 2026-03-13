@@ -300,19 +300,14 @@ export default function Home() {
                               />
                               <span className="truncate">{p.name}</span>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0 ml-1">
-                              <span className="font-mono text-gray-400">
-                                ₹{p.bet}
-                              </span>
-                              <span
-                                className={`font-mono font-medium w-14 text-right ${
-                                  p.profit >= 0 ? "text-green-400" : "text-red-400"
-                                }`}
-                              >
-                                {p.profit >= 0 ? "+" : ""}
-                                {p.profit.toFixed(0)}
-                              </span>
-                            </div>
+                            <span
+                              className={`font-mono font-medium shrink-0 ml-1 ${
+                                p.profit >= 0 ? "text-green-400" : "text-red-400"
+                              }`}
+                            >
+                              {p.profit >= 0 ? "+" : ""}
+                              {p.profit.toFixed(0)}
+                            </span>
                           </div>
                         ))}
                       </div>
