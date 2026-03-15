@@ -8,6 +8,7 @@ interface TeamInfo {
   fullName: string;
   shortName: string;
   teamColor: string;
+  isSystemGenerated: boolean;
 }
 
 interface Schedule {
@@ -248,7 +249,7 @@ export default function SchedulesPage() {
                   <option value="" disabled>
                     Select Team 1
                   </option>
-                  {teams.map((team) => (
+                  {teams.filter((t) => !t.isSystemGenerated).map((team) => (
                     <option key={team.id} value={team.id}>
                       {team.fullName}
                     </option>
@@ -268,7 +269,7 @@ export default function SchedulesPage() {
                   <option value="" disabled>
                     Select Team 2
                   </option>
-                  {teams.map((team) => (
+                  {teams.filter((t) => !t.isSystemGenerated).map((team) => (
                     <option key={team.id} value={team.id}>
                       {team.fullName}
                     </option>
