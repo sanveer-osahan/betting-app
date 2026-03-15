@@ -24,13 +24,13 @@ export async function seedSchedules() {
 
     await prisma.schedule.upsert({
       where: {
-        team1Id_team2Id_startsAt: {
+        team1Id_team2Id: {
           team1Id: team1.id,
           team2Id: team2.id,
-          startsAt,
         },
       },
       update: {
+        startsAt,
         isSystemGenerated: true,
       },
       create: {

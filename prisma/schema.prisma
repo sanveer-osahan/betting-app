@@ -39,5 +39,5 @@ model Schedule {
   team1             Team     @relation("ScheduleTeam1", fields: [team1Id], references: [id])
   team2             Team     @relation("ScheduleTeam2", fields: [team2Id], references: [id])
 
-  @@unique([team1Id, team2Id, startsAt])
+  @@unique([team1Id, team2Id])
 }
