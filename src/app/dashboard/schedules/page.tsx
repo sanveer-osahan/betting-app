@@ -194,11 +194,11 @@ export default function SchedulesPage() {
               <div>
                 <div className="font-medium">
                   <span style={{ color: schedule.team1.teamColor }}>
-                    {schedule.team1.fullName}
+                    {schedule.team1.shortName}
                   </span>
                   <span className="text-gray-500 mx-2">vs</span>
                   <span style={{ color: schedule.team2.teamColor }}>
-                    {schedule.team2.fullName}
+                    {schedule.team2.shortName}
                   </span>
                 </div>
                 <p className="text-sm text-gray-400 mt-1">
