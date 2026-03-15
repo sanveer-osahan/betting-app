@@ -2,8 +2,6 @@ import { prisma } from "./prisma";
 import schedules from "./ipl-2026-schedule.json";
 
 export async function seedSchedules() {
-  await prisma.schedule.deleteMany({ where: { isSystemGenerated: true } });
-
   for (const entry of schedules) {
     const team1 = await prisma.team.findUnique({
       where: { fullName: entry.team1 },
