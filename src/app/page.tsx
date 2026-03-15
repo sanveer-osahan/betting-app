@@ -18,9 +18,45 @@ export default function Home() {
   const teamA = players.filter((p) => p.team === "A");
   const teamB = players.filter((p) => p.team === "B");
   const bothTeamsHavePlayers = teamA.length > 0 && teamB.length > 0;
-  const totalPool = bothTeamsHavePlayers
-    ? players.reduce((sum, p) => sum + p.bet, 0)
-    : 0;
+  const totalAmountA = teamA.reduce((sum, p) => sum + p.bet, 0);
+  const totalAmountB = teamB.reduce((sum, p) => sum + p.bet, 0);
+  const totalPool = bothTeamsHavePlayers ? totalAmountA + totalAmountB : 0;
+
+  function computeValidation(): {
+    valid: boolean;
+    deficit: number;
+    deficitTeam: "A" | "B" | null;
+  } {
+    if (!bothTeamsHavePlayers) {
+      return { valid: false, deficit: 0, deficitTeam: null };
+    }
+    if (totalAmountA === totalAmountB) {
+      return { valid: true, deficit: 0, deficitTeam: null };
+    }
+
+    const higherTeam = totalAmountA > totalAmountB ? "A" : "B";
+    const lowerTeam = higherTeam === "A" ? "B" : "A";
+    const higherAmount = higherTeam === "A" ? totalAmountA : totalAmountB;
+    const lowerAmount = higherTeam === "A" ? totalAmountB : totalAmountA;
+    const higherCount = higherTeam === "A" ? teamA.length : teamB.length;
+    const lowerCount = higherTeam === "A" ? teamB.length : teamA.length;
+
+    const requiredAmount =
+      higherCount > lowerCount
+        ? (higherAmount / higherCount) * lowerCount
+        : higherAmount;
+
+    if (lowerAmount >= requiredAmount) {
+      return { valid: true, deficit: 0, deficitTeam: null };
+    }
+    return {
+      valid: false,
+      deficit: requiredAmount - lowerAmount,
+      deficitTeam: lowerTeam,
+    };
+  }
+
+  const validation = computeValidation();
 
   function computeScenario(winningTeam: "A" | "B") {
     if (!bothTeamsHavePlayers) return null;
@@ -261,6 +297,34 @@ export default function Home() {
                 );
               })}
             </div>
+
+            {/* Validation Status */}
+            {bothTeamsHavePlayers && (
+              <div
+                className={`rounded-lg p-3 border text-center ${
+                  validation.valid
+                    ? "bg-green-900/30 border-green-800 text-green-400"
+                    : "bg-red-900/30 border-red-800 text-red-400"
+                }`}
+              >
+                {validation.valid ? (
+                  <p className="text-xs font-medium">
+                    Bets are valid — payouts are fair for all players.
+                  </p>
+                ) : (
+                  <div>
+                    <p className="text-xs font-bold mb-1">
+                      Bets are not valid
+                    </p>
+                    <p className="text-xs">
+                      Team {validation.deficitTeam} needs ₹
+                      {validation.deficit.toFixed(0)} more to make this bet
+                      fair.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Scenarios */}
             <div className="grid grid-cols-2 gap-3">
