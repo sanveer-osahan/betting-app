@@ -11,6 +11,9 @@ The admin user has access to special tabs in the dashboard:
 - **Teams** — (future)
 - **Schedules** — (future)
 
+## UI Rules
+- Never display created/updated timestamps for entities in the UI.
+
 ## Tech Stack
 - Next.js 15 (App Router), React 19, TypeScript
 - Tailwind CSS 4

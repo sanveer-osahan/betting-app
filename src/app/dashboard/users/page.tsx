@@ -7,7 +7,6 @@ interface User {
   id: string;
   username: string;
   name: string;
-  createdAt: string;
 }
 
 type ModalMode = null | "create" | "edit";
@@ -196,14 +195,13 @@ export default function UsersPage() {
             <tr className="border-b border-gray-800 text-left text-sm text-gray-400">
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Username</th>
-              <th className="px-4 py-3 font-medium">Created</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
                   No users found
                 </td>
               </tr>
@@ -215,9 +213,6 @@ export default function UsersPage() {
                 >
                   <td className="px-4 py-3">{user.name}</td>
                   <td className="px-4 py-3 text-gray-400">{user.username}</td>
-                  <td className="px-4 py-3 text-gray-400 text-sm">
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </td>
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => openEdit(user)}
