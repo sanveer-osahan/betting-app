@@ -26,10 +26,15 @@ export default async function DashboardPage() {
               Create, edit, and manage users
             </p>
           </Link>
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 opacity-50 cursor-not-allowed">
+          <Link
+            href="/dashboard/teams"
+            className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-blue-600 transition"
+          >
             <h2 className="font-semibold mb-1">Teams</h2>
-            <p className="text-sm text-gray-400">Coming soon</p>
-          </div>
+            <p className="text-sm text-gray-400">
+              Create and manage teams
+            </p>
+          </Link>
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 opacity-50 cursor-not-allowed">
             <h2 className="font-semibold mb-1">Schedules</h2>
             <p className="text-sm text-gray-400">Coming soon</p>
