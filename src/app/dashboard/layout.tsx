@@ -34,9 +34,12 @@ export default async function DashboardLayout({
             >
               Users
             </Link>
-            <span className="px-4 py-2.5 text-sm text-gray-600 cursor-not-allowed">
+            <Link
+              href="/dashboard/teams"
+              className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
+            >
               Teams
-            </span>
+            </Link>
             <span className="px-4 py-2.5 text-sm text-gray-600 cursor-not-allowed">
               Schedules
             </span>
