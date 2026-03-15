@@ -2,6 +2,9 @@ import { prisma } from "./prisma";
 import schedules from "./ipl-2026-schedule.json";
 
 export async function seedSchedules() {
+  // Clear stale system-generated schedules so changed times don't create duplicates
+  await prisma.schedule.deleteMany({ where: { isSystemGenerated: true } });
+
   for (const entry of schedules) {
     const team1 = await prisma.team.findUnique({
       where: { fullName: entry.team1 },
@@ -21,13 +24,13 @@ export async function seedSchedules() {
 
     await prisma.schedule.upsert({
       where: {
-        team1Id_team2Id_startsAt: {
+        team1Id_team2Id: {
           team1Id: team1.id,
           team2Id: team2.id,
-          startsAt,
         },
       },
       update: {
+        startsAt,
         isSystemGenerated: true,
       },
       create: {
