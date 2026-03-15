@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
@@ -28,6 +29,21 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
+
+    const session = JSON.stringify({
+      id: user.id,
+      username: user.username,
+      name: user.name,
+    });
+
+    const cookieStore = await cookies();
+    cookieStore.set("session", session, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
 
     return NextResponse.json({
       message: "Login successful",
