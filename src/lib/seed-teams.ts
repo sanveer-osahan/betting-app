@@ -5,7 +5,10 @@ export async function seedTeams() {
   for (const team of IPL_TEAMS) {
     await prisma.team.upsert({
       where: { shortName: team.shortName },
-      update: {},
+      update: {
+        fullName: team.fullName,
+        teamColor: team.teamColor,
+      },
       create: {
         fullName: team.fullName,
         shortName: team.shortName,
