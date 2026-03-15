@@ -11,5 +11,13 @@ export async function register() {
     } catch (error) {
       console.error("Failed to seed teams:", error);
     }
+
+    const { seedSchedules } = await import("./lib/seed-schedules");
+    try {
+      await seedSchedules();
+      console.log("IPL schedules seeded successfully");
+    } catch (error) {
+      console.error("Failed to seed schedules:", error);
+    }
   }
 }

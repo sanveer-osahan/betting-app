@@ -14,6 +14,10 @@ The admin user has access to special tabs in the dashboard:
 ## UI Rules
 - Never display created/updated timestamps for entities in the UI.
 
+## Timezone
+- All timestamps everywhere — in the database, APIs, JSON files, and UI — must be in IST (Indian Standard Time, UTC+5:30).
+- Use the `+05:30` offset in ISO 8601 format (e.g., `2026-03-28T15:30:00+05:30`), never UTC/Z.
+
 ## Tech Stack
 - Next.js 15 (App Router), React 19, TypeScript
 - Tailwind CSS 4
