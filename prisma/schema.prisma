@@ -17,11 +17,27 @@ model User {
 }
 
 model Team {
-  id                String   @id @default(cuid())
-  fullName          String   @unique
-  shortName         String   @unique
+  id                String     @id @default(cuid())
+  fullName          String     @unique
+  shortName         String     @unique
   teamColor         String
+  isSystemGenerated Boolean    @default(false)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  schedulesAsTeam1  Schedule[] @relation("ScheduleTeam1")
+  schedulesAsTeam2  Schedule[] @relation("ScheduleTeam2")
+}
+
+model Schedule {
+  id                String   @id @default(cuid())
+  team1Id           String
+  team2Id           String
+  startsAt          DateTime
   isSystemGenerated Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  team1             Team     @relation("ScheduleTeam1", fields: [team1Id], references: [id])
+  team2             Team     @relation("ScheduleTeam2", fields: [team2Id], references: [id])
+
+  @@unique([team1Id, team2Id, startsAt])
 }
