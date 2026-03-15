@@ -1,0 +1,142 @@
+[
+  {
+    "match": 1,
+    "team1": "Royal Challengers Bengaluru",
+    "team2": "Sunrisers Hyderabad",
+    "startsAt": "2026-03-28T10:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 2,
+    "team1": "Mumbai Indians",
+    "team2": "Kolkata Knight Riders",
+    "startsAt": "2026-03-29T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 3,
+    "team1": "Rajasthan Royals",
+    "team2": "Chennai Super Kings",
+    "startsAt": "2026-03-30T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 4,
+    "team1": "Punjab Kings",
+    "team2": "Gujarat Titans",
+    "startsAt": "2026-03-31T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 5,
+    "team1": "Lucknow Super Giants",
+    "team2": "Delhi Capitals",
+    "startsAt": "2026-04-01T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 6,
+    "team1": "Kolkata Knight Riders",
+    "team2": "Sunrisers Hyderabad",
+    "startsAt": "2026-04-02T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 7,
+    "team1": "Chennai Super Kings",
+    "team2": "Punjab Kings",
+    "startsAt": "2026-04-03T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 8,
+    "team1": "Delhi Capitals",
+    "team2": "Mumbai Indians",
+    "startsAt": "2026-04-04T10:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 9,
+    "team1": "Gujarat Titans",
+    "team2": "Rajasthan Royals",
+    "startsAt": "2026-04-04T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 10,
+    "team1": "Sunrisers Hyderabad",
+    "team2": "Lucknow Super Giants",
+    "startsAt": "2026-04-05T10:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 11,
+    "team1": "Royal Challengers Bengaluru",
+    "team2": "Chennai Super Kings",
+    "startsAt": "2026-04-05T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 12,
+    "team1": "Kolkata Knight Riders",
+    "team2": "Punjab Kings",
+    "startsAt": "2026-04-06T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 13,
+    "team1": "Rajasthan Royals",
+    "team2": "Mumbai Indians",
+    "startsAt": "2026-04-07T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 14,
+    "team1": "Delhi Capitals",
+    "team2": "Gujarat Titans",
+    "startsAt": "2026-04-08T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 15,
+    "team1": "Kolkata Knight Riders",
+    "team2": "Lucknow Super Giants",
+    "startsAt": "2026-04-09T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 16,
+    "team1": "Rajasthan Royals",
+    "team2": "Royal Challengers Bengaluru",
+    "startsAt": "2026-04-10T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 17,
+    "team1": "Punjab Kings",
+    "team2": "Sunrisers Hyderabad",
+    "startsAt": "2026-04-11T10:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 18,
+    "team1": "Chennai Super Kings",
+    "team2": "Delhi Capitals",
+    "startsAt": "2026-04-11T14:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 19,
+    "team1": "Lucknow Super Giants",
+    "team2": "Gujarat Titans",
+    "startsAt": "2026-04-12T10:00:00Z",
+    "is_system_generated": true
+  },
+  {
+    "match": 20,
+    "team1": "Mumbai Indians",
+    "team2": "Royal Challengers Bengaluru",
+    "startsAt": "2026-04-12T14:00:00Z",
+    "is_system_generated": true
+  }
+]
