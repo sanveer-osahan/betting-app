@@ -4,8 +4,8 @@ import { getSession, isAdmin } from "@/lib/auth";
 
 export async function GET() {
   const session = await getSession();
-  if (!isAdmin(session)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const schedules = await prisma.schedule.findMany({
@@ -15,6 +15,15 @@ export async function GET() {
       },
       team2: {
         select: { id: true, fullName: true, shortName: true, teamColor: true },
+      },
+      bets: {
+        select: {
+          id: true,
+          teamId: true,
+          amount: true,
+          userId: true,
+          user: { select: { id: true, name: true, username: true } },
+        },
       },
     },
     orderBy: { startsAt: "asc" },

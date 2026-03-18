@@ -14,6 +14,7 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  bets      Bet[]
 }
 
 model Team {
@@ -26,6 +27,7 @@ model Team {
   updatedAt         DateTime   @updatedAt
   schedulesAsTeam1  Schedule[] @relation("ScheduleTeam1")
   schedulesAsTeam2  Schedule[] @relation("ScheduleTeam2")
+  bets              Bet[]
 }
 
 model Schedule {
@@ -38,6 +40,22 @@ model Schedule {
   updatedAt         DateTime @updatedAt
   team1             Team     @relation("ScheduleTeam1", fields: [team1Id], references: [id])
   team2             Team     @relation("ScheduleTeam2", fields: [team2Id], references: [id])
+  bets              Bet[]
 
   @@unique([team1Id, team2Id, startsAt])
+}
+
+model Bet {
+  id         String   @id @default(cuid())
+  scheduleId String
+  teamId     String
+  amount     Int
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  team       Team     @relation(fields: [teamId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, userId])
 }
