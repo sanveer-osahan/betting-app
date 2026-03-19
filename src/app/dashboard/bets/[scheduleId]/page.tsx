@@ -59,22 +59,6 @@ export default function ScheduleBettingPage() {
 
   const bettingOpen = schedule ? new Date() <= new Date(schedule.startsAt) : false;
 
-  useEffect(() => {
-    try {
-      const sessionCookie = document.cookie
-        .split("; ")
-        .find((c) => c.startsWith("session="));
-      if (sessionCookie) {
-        const session = JSON.parse(
-          decodeURIComponent(sessionCookie.split("=").slice(1).join("="))
-        );
-        setCurrentUserId(session.id);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
   const buildPlayers = useCallback(
     (data: Schedule, userId: string): Player[] => {
       return data.bets.map((bet) => ({
@@ -90,19 +74,34 @@ export default function ScheduleBettingPage() {
   );
 
   useEffect(() => {
-    if (!currentUserId) return;
+    let userId = "";
+    try {
+      const sessionCookie = document.cookie
+        .split("; ")
+        .find((c) => c.startsWith("session="));
+      if (sessionCookie) {
+        const session = JSON.parse(
+          decodeURIComponent(sessionCookie.split("=").slice(1).join("="))
+        );
+        userId = session.id;
+        setCurrentUserId(userId);
+      }
+    } catch {
+      // ignore
+    }
+
     fetch("/api/schedules")
       .then((res) => res.json())
       .then((data: Schedule[]) => {
         const s = data.find((item) => item.id === scheduleId);
         if (s) {
           setSchedule(s);
-          setPlayers(buildPlayers(s, currentUserId));
+          setPlayers(buildPlayers(s, userId));
         }
       })
       .catch(() => setError("Failed to load schedule"))
       .finally(() => setLoading(false));
-  }, [scheduleId, currentUserId, buildPlayers]);
+  }, [scheduleId, buildPlayers]);
 
   if (loading) {
     return (
