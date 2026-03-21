@@ -1,18 +1,15 @@
 # Betting App
 
-## Admin Role
-- Admin access is determined by username: the user with username `admin` has admin privileges.
-- This is not traditional RBAC — it's a simple username check since this is a small, non-production app.
-- Whenever "admin roles and access" is mentioned, it refers to the user with username `admin`.
-
-## Admin-Only Features
-The admin user has access to special tabs in the dashboard:
-- **Users** — Create, view, edit, and delete users
-- **Teams** — (future)
-- **Schedules** — (future)
+## Structure
+- **Players** — Named entities that participate in bets. Managed via the Players tab.
+- **Bets** — A match between two free-text team names with a match date. Can be "open" or "complete".
+- **BetEntries** — A player's wager on a specific bet, picking a team and amount.
+- **Leaderboard** — Aggregates profit/loss across all completed bets per player.
+- All authenticated users have equal access. No admin roles.
 
 ## UI Rules
 - Never display created/updated timestamps for entities in the UI.
+- Mobile-optimized (16:9 portrait). Dark theme (bg-gray-950 main, bg-gray-900 cards).
 
 ## Timezone
 - All timestamps everywhere — in the database, APIs, JSON files, and UI — must be in IST (Indian Standard Time, UTC+5:30).

@@ -1,29 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 
-interface TeamInfo {
+interface EntryInfo {
   id: string;
-  fullName: string;
-  shortName: string;
-  teamColor: string;
-}
-
-interface BetInfo {
-  id: string;
-  teamId: string;
+  team: string;
   amount: number;
-  userId: string;
-  user: { id: string; name: string; username: string };
+  player: { id: string; name: string };
 }
 
-interface Schedule {
+interface Bet {
   id: string;
-  team1: TeamInfo;
-  team2: TeamInfo;
-  startsAt: string;
-  bets: BetInfo[];
+  team1Name: string;
+  team2Name: string;
+  matchDate: string;
+  status: string;
+  winningTeam: string | null;
+  entries: EntryInfo[];
 }
 
 function formatIST(dateStr: string) {
@@ -34,67 +28,90 @@ function formatIST(dateStr: string) {
   });
 }
 
-function categorizeSchedule(startsAt: string): "current" | "upcoming" | "past" {
-  const now = new Date();
-  const start = new Date(startsAt);
-  const diffMs = start.getTime() - now.getTime();
-  const hourMs = 60 * 60 * 1000;
-
-  if (diffMs > 0 && diffMs <= 24 * hourMs) {
-    // Less than 24h before start
-    return "current";
-  }
-  if (diffMs > 24 * hourMs) {
-    return "upcoming";
-  }
-  // Match has started
-  if (Math.abs(diffMs) < 4 * hourMs) {
-    // Within 4h after start
-    return "current";
-  }
-  return "past";
-}
-
-function isBettingOpen(startsAt: string): boolean {
-  const now = new Date();
-  const start = new Date(startsAt);
-  return now.getTime() <= start.getTime();
-}
-
 export default function BetsPage() {
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [team1Name, setTeam1Name] = useState("");
+  const [team2Name, setTeam2Name] = useState("");
+  const [matchDate, setMatchDate] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    current: true,
-    upcoming: true,
-    past: false,
+    open: true,
+    complete: true,
   });
-  const [currentUserId, setCurrentUserId] = useState<string>("");
 
-  useEffect(() => {
-    // Get current user ID from session cookie
-    try {
-      const sessionCookie = document.cookie
-        .split("; ")
-        .find((c) => c.startsWith("session="));
-      if (sessionCookie) {
-        const session = JSON.parse(decodeURIComponent(sessionCookie.split("=").slice(1).join("=")));
-        setCurrentUserId(session.id);
-      }
-    } catch {
-      // ignore
-    }
-
-    fetch("/api/schedules")
+  const fetchBets = useCallback(() => {
+    fetch("/api/bets")
       .then((res) => res.json())
-      .then((data) => setSchedules(data))
+      .then((data) => setBets(data))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const current = schedules.filter((s) => categorizeSchedule(s.startsAt) === "current");
-  const upcoming = schedules.filter((s) => categorizeSchedule(s.startsAt) === "upcoming");
-  const past = schedules.filter((s) => categorizeSchedule(s.startsAt) === "past");
+  useEffect(() => {
+    fetchBets();
+  }, [fetchBets]);
+
+  const openBets = bets.filter((b) => b.status === "open");
+  const completeBets = bets.filter((b) => b.status === "complete");
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!team1Name.trim() || !team2Name.trim() || !matchDate) return;
+    setCreating(true);
+    setError("");
+
+    try {
+      const istDate = matchDate + ":00+05:30";
+      const res = await fetch("/api/bets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          team1Name: team1Name.trim(),
+          team2Name: team2Name.trim(),
+          matchDate: istDate,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to create bet");
+        return;
+      }
+      setTeam1Name("");
+      setTeam2Name("");
+      setMatchDate("");
+      fetchBets();
+    } catch {
+      setError("Something went wrong");
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteId) return;
+    setDeleting(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/bets/${deleteId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to delete bet");
+        setDeleteId(null);
+        return;
+      }
+      setDeleteId(null);
+      fetchBets();
+    } catch {
+      setError("Something went wrong");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   function toggleSection(key: string) {
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -109,37 +126,154 @@ export default function BetsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="max-w-lg mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Bets</h1>
 
+      {/* Create Bet Form */}
+      <form onSubmit={handleCreate} className="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6">
+        <h2 className="text-sm font-semibold mb-3">Create New Bet</h2>
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="text"
+              value={team1Name}
+              onChange={(e) => setTeam1Name(e.target.value)}
+              placeholder="Team 1"
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            />
+            <input
+              type="text"
+              value={team2Name}
+              onChange={(e) => setTeam2Name(e.target.value)}
+              placeholder="Team 2"
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+            />
+          </div>
+          <input
+            type="datetime-local"
+            value={matchDate}
+            onChange={(e) => setMatchDate(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+          />
+          <button
+            type="submit"
+            disabled={creating || !team1Name.trim() || !team2Name.trim() || !matchDate}
+            className="w-full py-2.5 bg-blue-600 rounded-lg text-sm font-medium active:bg-blue-700 transition disabled:opacity-50"
+          >
+            {creating ? "Creating..." : "Create Bet"}
+          </button>
+        </div>
+      </form>
+
+      {error && (
+        <div className="rounded-lg p-3 border bg-red-900/30 border-red-800 text-red-400 text-xs text-center mb-4">
+          {error}
+        </div>
+      )}
+
+      {/* Collapsible Sections */}
       <div className="space-y-4">
         <CollapsibleSection
-          title="Current Bets"
-          count={current.length}
-          expanded={expandedSections.current}
-          onToggle={() => toggleSection("current")}
+          title="Open Bets"
+          count={openBets.length}
+          expanded={expandedSections.open}
+          onToggle={() => toggleSection("open")}
         >
-          <ScheduleList schedules={current} currentUserId={currentUserId} />
+          {openBets.length === 0 ? (
+            <p className="text-gray-600 text-sm py-2">No open bets</p>
+          ) : (
+            <div className="space-y-3">
+              {openBets.map((bet) => (
+                <div key={bet.id} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                  <Link
+                    href={`/dashboard/bets/${bet.id}`}
+                    className="block hover:opacity-80 transition"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium text-sm">
+                        {bet.team1Name} <span className="text-gray-500">vs</span> {bet.team2Name}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500">{formatIST(bet.matchDate)}</p>
+                    <p className="text-xs text-gray-500 mt-1">{bet.entries.length} entries</p>
+                  </Link>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setDeleteId(bet.id);
+                    }}
+                    className="mt-2 text-xs text-red-400 hover:text-red-300 transition"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="Upcoming Bets"
-          count={upcoming.length}
-          expanded={expandedSections.upcoming}
-          onToggle={() => toggleSection("upcoming")}
+          title="Completed Bets"
+          count={completeBets.length}
+          expanded={expandedSections.complete}
+          onToggle={() => toggleSection("complete")}
         >
-          <ScheduleList schedules={upcoming} currentUserId={currentUserId} />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Past Bets"
-          count={past.length}
-          expanded={expandedSections.past}
-          onToggle={() => toggleSection("past")}
-        >
-          <ScheduleList schedules={past} currentUserId={currentUserId} />
+          {completeBets.length === 0 ? (
+            <p className="text-gray-600 text-sm py-2">No completed bets</p>
+          ) : (
+            <div className="space-y-3">
+              {completeBets.map((bet) => {
+                const winnerName = bet.winningTeam === "team1" ? bet.team1Name : bet.team2Name;
+                return (
+                  <Link
+                    key={bet.id}
+                    href={`/dashboard/bets/${bet.id}`}
+                    className="block bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium text-sm">
+                        {bet.team1Name} <span className="text-gray-500">vs</span> {bet.team2Name}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500">{formatIST(bet.matchDate)}</p>
+                    <p className="text-xs text-green-400 mt-1">
+                      Winner: {winnerName}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">{bet.entries.length} entries</p>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </CollapsibleSection>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-sm font-bold mb-2">Delete Bet</h3>
+            <p className="text-xs text-gray-400 mb-4">
+              Are you sure you want to delete this bet and all its entries?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 py-2 bg-red-600 rounded-lg text-sm font-medium active:bg-red-700 transition disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+              <button
+                onClick={() => setDeleteId(null)}
+                className="flex-1 py-2 bg-gray-800 rounded-lg text-sm active:bg-gray-700 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -179,76 +313,6 @@ function CollapsibleSection({
         </svg>
       </button>
       {expanded && <div className="px-4 pb-4">{children}</div>}
-    </div>
-  );
-}
-
-function ScheduleList({
-  schedules,
-  currentUserId,
-}: {
-  schedules: Schedule[];
-  currentUserId: string;
-}) {
-  if (schedules.length === 0) {
-    return <p className="text-gray-600 text-sm py-2">No matches found</p>;
-  }
-
-  return (
-    <div className="space-y-3">
-      {schedules.map((schedule) => {
-        const userBet = schedule.bets.find((b) => b.userId === currentUserId);
-        const bettingOpen = isBettingOpen(schedule.startsAt);
-        const bettingTeam = userBet
-          ? schedule.team1.id === userBet.teamId
-            ? schedule.team1
-            : schedule.team2
-          : null;
-
-        return (
-          <Link
-            key={schedule.id}
-            href={`/dashboard/bets/${schedule.id}`}
-            className="block bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-medium">
-                <span style={{ color: schedule.team1.teamColor }}>
-                  {schedule.team1.shortName}
-                </span>
-                <span className="text-gray-500 mx-2">vs</span>
-                <span style={{ color: schedule.team2.teamColor }}>
-                  {schedule.team2.shortName}
-                </span>
-              </div>
-              <span className="text-xs text-gray-500">
-                {formatIST(schedule.startsAt)}
-              </span>
-            </div>
-
-            {userBet && bettingTeam ? (
-              <p className="text-xs text-gray-400">
-                You placed{" "}
-                <span className="text-white font-medium">₹{userBet.amount}</span>{" "}
-                on{" "}
-                <span style={{ color: bettingTeam.teamColor }} className="font-medium">
-                  {bettingTeam.shortName}
-                </span>
-              </p>
-            ) : (
-              <p className="text-xs text-gray-500">
-                {bettingOpen ? "No bet placed yet" : "Betting closed"}
-              </p>
-            )}
-
-            {!bettingOpen && (
-              <span className="inline-block mt-1 text-[10px] text-red-400 bg-red-900/30 px-2 py-0.5 rounded">
-                Betting Closed
-              </span>
-            )}
-          </Link>
-        );
-      })}
     </div>
   );
 }

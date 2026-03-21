@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession, isAdmin } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import Link from "next/link";
 
 export default async function DashboardLayout({
@@ -10,12 +10,10 @@ export default async function DashboardLayout({
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const admin = isAdmin(session);
-
   return (
     <div className="min-h-screen flex flex-col">
       <nav className="border-b border-gray-800 bg-gray-900">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/dashboard" className="text-lg font-bold">
             Betting App
           </Link>
@@ -26,50 +24,25 @@ export default async function DashboardLayout({
         </div>
       </nav>
       <div className="border-b border-gray-800 bg-gray-950">
-        <div className="max-w-5xl mx-auto px-4 flex gap-1">
-          {admin ? (
-            <>
-              <Link
-                href="/dashboard/users"
-                className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
-              >
-                Users
-              </Link>
-              <Link
-                href="/dashboard/teams"
-                className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
-              >
-                Teams
-              </Link>
-              <Link
-                href="/dashboard/schedules"
-                className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
-              >
-                Schedules
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/dashboard"
-                className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
-              >
-                Leaderboard
-              </Link>
-              <Link
-                href="/dashboard/bets"
-                className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
-              >
-                Bets
-              </Link>
-              <Link
-                href="/dashboard/my-teams"
-                className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
-              >
-                Teams
-              </Link>
-            </>
-          )}
+        <div className="max-w-lg mx-auto px-4 flex gap-1">
+          <Link
+            href="/dashboard"
+            className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
+          >
+            Leaderboard
+          </Link>
+          <Link
+            href="/dashboard/bets"
+            className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
+          >
+            Bets
+          </Link>
+          <Link
+            href="/dashboard/players"
+            className="px-4 py-2.5 text-sm hover:bg-gray-800 transition text-gray-300 hover:text-white"
+          >
+            Players
+          </Link>
         </div>
       </div>
       <main className="flex-1">{children}</main>

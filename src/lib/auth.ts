@@ -18,6 +18,3 @@ export async function getSession(): Promise<Session | null> {
   }
 }
 
-export function isAdmin(session: Session | null): boolean {
-  return session?.username === "admin";
-}

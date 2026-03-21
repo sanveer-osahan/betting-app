@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import Link from "next/link";
 
 function LoginForm() {
   const router = useRouter();
@@ -97,6 +98,13 @@ function LoginForm() {
       >
         {loading ? "Logging in..." : "Log In"}
       </button>
+
+      <p className="text-sm text-gray-400 text-center">
+        Don&apos;t have an account?{" "}
+        <Link href="/signup" className="text-blue-400 hover:text-blue-300">
+          Sign up
+        </Link>
+      </p>
     </form>
   );
 }

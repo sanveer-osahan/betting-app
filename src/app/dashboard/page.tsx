@@ -1,59 +1,70 @@
-import { getSession, isAdmin } from "@/lib/auth";
-import Link from "next/link";
+"use client";
 
-export default async function DashboardPage() {
-  const session = await getSession();
-  const admin = isAdmin(session);
+import { useEffect, useState } from "react";
 
-  if (admin) {
+interface LeaderboardEntry {
+  playerId: string;
+  playerName: string;
+  totalAmount: number;
+}
+
+export default function LeaderboardPage() {
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/leaderboard")
+      .then((res) => res.json())
+      .then((data) => setEntries(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-2">
-          Welcome, {session?.name ?? "User"}
-        </h1>
-        <p className="text-gray-400 mb-6">
-          You have admin access. Use the tabs above to manage the app.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link
-            href="/dashboard/users"
-            className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-blue-600 transition"
-          >
-            <h2 className="font-semibold mb-1">Users</h2>
-            <p className="text-sm text-gray-400">
-              Create, edit, and manage users
-            </p>
-          </Link>
-          <Link
-            href="/dashboard/teams"
-            className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-blue-600 transition"
-          >
-            <h2 className="font-semibold mb-1">Teams</h2>
-            <p className="text-sm text-gray-400">
-              Create and manage teams
-            </p>
-          </Link>
-          <Link
-            href="/dashboard/schedules"
-            className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-blue-600 transition"
-          >
-            <h2 className="font-semibold mb-1">Schedules</h2>
-            <p className="text-sm text-gray-400">
-              Create and manage schedules
-            </p>
-          </Link>
-        </div>
+      <div className="flex items-center justify-center py-20">
+        <p className="text-gray-400">Loading leaderboard...</p>
       </div>
     );
   }
 
-  // Non-admin: Leaderboard (placeholder)
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-2">Leaderboard</h1>
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center text-gray-500">
-        Leaderboard coming soon
-      </div>
+    <div className="max-w-lg mx-auto px-4 py-6">
+      <h1 className="text-2xl font-bold mb-6">Leaderboard</h1>
+
+      {entries.length === 0 ? (
+        <p className="text-gray-500 text-sm">No players yet. Add players and complete some bets to see the leaderboard.</p>
+      ) : (
+        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-[3rem_1fr_auto] gap-2 px-4 py-2.5 border-b border-gray-800 text-xs text-gray-500 font-medium">
+            <span>#</span>
+            <span>Player</span>
+            <span className="text-right">Total</span>
+          </div>
+          {entries.map((entry, index) => (
+            <div
+              key={entry.playerId}
+              className="grid grid-cols-[3rem_1fr_auto] gap-2 px-4 py-3 border-b border-gray-800/50 last:border-b-0"
+            >
+              <span className="text-sm text-gray-500">{index + 1}</span>
+              <span className="text-sm font-medium">{entry.playerName}</span>
+              <span
+                className={`text-sm font-mono font-medium text-right ${
+                  entry.totalAmount > 0
+                    ? "text-green-400"
+                    : entry.totalAmount < 0
+                      ? "text-red-400"
+                      : "text-gray-400"
+                }`}
+              >
+                {entry.totalAmount > 0 && "+"}
+                {entry.totalAmount < 0 && "-"}
+                ₹{Math.abs(entry.totalAmount)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
