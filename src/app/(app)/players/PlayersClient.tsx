@@ -7,7 +7,7 @@ interface Player {
   name: string;
 }
 
-export default function PlayersPage() {
+export default function PlayersClient({ isAdmin }: { isAdmin: boolean }) {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -19,7 +19,7 @@ export default function PlayersPage() {
   const fetchPlayers = useCallback(() => {
     fetch("/api/players")
       .then((res) => res.json())
-      .then((data) => setPlayers(data))
+      .then((data) => setPlayers(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -88,23 +88,25 @@ export default function PlayersPage() {
     <div className="max-w-lg mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Players</h1>
 
-      {/* Add Player Form */}
-      <form onSubmit={handleAdd} className="flex gap-2 mb-6">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Player name"
-          className="flex-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
-        />
-        <button
-          type="submit"
-          disabled={adding || !name.trim()}
-          className="px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium active:bg-blue-700 transition disabled:opacity-50"
-        >
-          {adding ? "Adding..." : "Add"}
-        </button>
-      </form>
+      {/* Add Player Form (admin only) */}
+      {isAdmin && (
+        <form onSubmit={handleAdd} className="flex gap-2 mb-6">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Player name"
+            className="flex-1 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+          />
+          <button
+            type="submit"
+            disabled={adding || !name.trim()}
+            className="px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium active:bg-blue-700 transition disabled:opacity-50"
+          >
+            {adding ? "Adding..." : "Add"}
+          </button>
+        </form>
+      )}
 
       {error && (
         <div className="rounded-lg p-3 border bg-red-900/30 border-red-800 text-red-400 text-xs text-center mb-4">
@@ -122,12 +124,14 @@ export default function PlayersPage() {
               className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-lg px-4 py-3"
             >
               <span className="text-sm font-medium">{player.name}</span>
-              <button
-                onClick={() => setDeleteId(player.id)}
-                className="text-xs text-red-400 hover:text-red-300 transition"
-              >
-                Delete
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setDeleteId(player.id)}
+                  className="text-xs text-red-400 hover:text-red-300 transition"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           ))}
         </div>

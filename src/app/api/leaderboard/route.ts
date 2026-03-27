@@ -6,10 +6,14 @@ export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { currentProfileId } = session;
+  if (!currentProfileId) return NextResponse.json({ error: "No profile selected" }, { status: 403 });
+
   const players = await prisma.player.findMany({
+    where: { profileId: currentProfileId },
     include: {
       betEntries: {
-        where: { bet: { status: "complete" } },
+        where: { bet: { status: "complete", profileId: currentProfileId } },
         select: { result: true },
       },
     },

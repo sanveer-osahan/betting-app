@@ -8,17 +8,37 @@ interface LeaderboardEntry {
   totalAmount: number;
 }
 
-export default function LeaderboardPage() {
+export default function LeaderboardClient({
+  isAdmin,
+  hasProfile,
+}: {
+  isAdmin: boolean;
+  hasProfile: boolean;
+}) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!hasProfile) {
+      setLoading(false);
+      return;
+    }
     fetch("/api/leaderboard")
       .then((res) => res.json())
-      .then((data) => setEntries(data))
+      .then((data) => setEntries(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [hasProfile]);
+
+  if (!hasProfile && !isAdmin) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-gray-500 text-sm text-center px-4">
+          You haven&apos;t been added to a profile yet. Please contact the admin.
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

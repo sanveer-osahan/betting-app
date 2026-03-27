@@ -35,7 +35,7 @@ function formatIST(dateStr: string) {
   });
 }
 
-export default function BetDetailPage() {
+export default function BetDetailClient({ isAdmin }: { isAdmin: boolean }) {
   const params = useParams();
   const router = useRouter();
   const betId = params.betId as string;
@@ -101,7 +101,7 @@ export default function BetDetailPage() {
     return (
       <div className="max-w-lg mx-auto px-4 py-6">
         <button
-          onClick={() => router.push("/dashboard/bets")}
+          onClick={() => router.push("/bets")}
           className="text-sm text-gray-400 hover:text-white mb-4 inline-block"
         >
           &larr; Back to Bets
@@ -122,11 +122,9 @@ export default function BetDetailPage() {
     ? bet.entries.reduce((sum, e) => sum + e.amount, 0)
     : 0;
 
-  // Scenarios for open bets
   const scenario1 = bothTeamsHaveEntries ? computePayouts(entriesInput, "team1") : null;
   const scenario2 = bothTeamsHaveEntries ? computePayouts(entriesInput, "team2") : null;
 
-  // Available players (not already in this bet)
   const entryPlayerIds = new Set(bet.entries.map((e) => e.player.id));
   const availablePlayers = allPlayers.filter((p) => !entryPlayerIds.has(p.id));
 
@@ -254,7 +252,7 @@ export default function BetDetailPage() {
   return (
     <div className="max-w-lg mx-auto px-4 py-6">
       <button
-        onClick={() => router.push("/dashboard/bets")}
+        onClick={() => router.push("/bets")}
         className="text-sm text-gray-400 hover:text-white mb-4 inline-block"
       >
         &larr; Back to Bets
@@ -314,7 +312,7 @@ export default function BetDetailPage() {
                             <span className="font-medium text-xs truncate mr-1">
                               {entry.player.name}
                             </span>
-                            {isOpen && !isEditing && (
+                            {isOpen && isAdmin && !isEditing && (
                               <div className="flex gap-1">
                                 <button
                                   onClick={() => startEdit(entry)}
@@ -468,8 +466,8 @@ export default function BetDetailPage() {
           </div>
         )}
 
-        {/* Add Entry Form (open bets only) */}
-        {isOpen && (
+        {/* Add Entry Form (admin + open bets only) */}
+        {isOpen && isAdmin && (
           <form onSubmit={handleAddEntry} className="bg-gray-900 border border-gray-800 rounded-lg p-3">
             <h3 className="text-xs font-semibold mb-2">Add Player Entry</h3>
             <div className="space-y-2">
@@ -523,8 +521,8 @@ export default function BetDetailPage() {
           </form>
         )}
 
-        {/* Complete Bet Button (open bets only) */}
-        {isOpen && (
+        {/* Complete Bet Button (admin + open bets only) */}
+        {isOpen && isAdmin && (
           <button
             onClick={() => setShowCompleteModal(true)}
             disabled={!validation.valid}

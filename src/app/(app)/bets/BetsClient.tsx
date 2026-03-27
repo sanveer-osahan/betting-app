@@ -28,7 +28,7 @@ function formatIST(dateStr: string) {
   });
 }
 
-export default function BetsPage() {
+export default function BetsClient({ isAdmin }: { isAdmin: boolean }) {
   const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(true);
   const [team1Name, setTeam1Name] = useState("");
@@ -46,7 +46,7 @@ export default function BetsPage() {
   const fetchBets = useCallback(() => {
     fetch("/api/bets")
       .then((res) => res.json())
-      .then((data) => setBets(data))
+      .then((data) => setBets(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -129,41 +129,43 @@ export default function BetsPage() {
     <div className="max-w-lg mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Bets</h1>
 
-      {/* Create Bet Form */}
-      <form onSubmit={handleCreate} className="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6">
-        <h2 className="text-sm font-semibold mb-3">Create New Bet</h2>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
+      {/* Create Bet Form (admin only) */}
+      {isAdmin && (
+        <form onSubmit={handleCreate} className="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6">
+          <h2 className="text-sm font-semibold mb-3">Create New Bet</h2>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                value={team1Name}
+                onChange={(e) => setTeam1Name(e.target.value)}
+                placeholder="Team 1"
+                className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+              />
+              <input
+                type="text"
+                value={team2Name}
+                onChange={(e) => setTeam2Name(e.target.value)}
+                placeholder="Team 2"
+                className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+              />
+            </div>
             <input
-              type="text"
-              value={team1Name}
-              onChange={(e) => setTeam1Name(e.target.value)}
-              placeholder="Team 1"
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
+              type="datetime-local"
+              value={matchDate}
+              onChange={(e) => setMatchDate(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
             />
-            <input
-              type="text"
-              value={team2Name}
-              onChange={(e) => setTeam2Name(e.target.value)}
-              placeholder="Team 2"
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
-            />
+            <button
+              type="submit"
+              disabled={creating || !team1Name.trim() || !team2Name.trim() || !matchDate}
+              className="w-full py-2.5 bg-blue-600 rounded-lg text-sm font-medium active:bg-blue-700 transition disabled:opacity-50"
+            >
+              {creating ? "Creating..." : "Create Bet"}
+            </button>
           </div>
-          <input
-            type="datetime-local"
-            value={matchDate}
-            onChange={(e) => setMatchDate(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:border-gray-500"
-          />
-          <button
-            type="submit"
-            disabled={creating || !team1Name.trim() || !team2Name.trim() || !matchDate}
-            className="w-full py-2.5 bg-blue-600 rounded-lg text-sm font-medium active:bg-blue-700 transition disabled:opacity-50"
-          >
-            {creating ? "Creating..." : "Create Bet"}
-          </button>
-        </div>
-      </form>
+        </form>
+      )}
 
       {error && (
         <div className="rounded-lg p-3 border bg-red-900/30 border-red-800 text-red-400 text-xs text-center mb-4">
@@ -186,7 +188,7 @@ export default function BetsPage() {
               {openBets.map((bet) => (
                 <div key={bet.id} className="bg-gray-800 border border-gray-700 rounded-lg p-4">
                   <Link
-                    href={`/dashboard/bets/${bet.id}`}
+                    href={`/bets/${bet.id}`}
                     className="block hover:opacity-80 transition"
                   >
                     <div className="flex items-center justify-between mb-1">
@@ -197,15 +199,17 @@ export default function BetsPage() {
                     <p className="text-xs text-gray-500">{formatIST(bet.matchDate)}</p>
                     <p className="text-xs text-gray-500 mt-1">{bet.entries.length} entries</p>
                   </Link>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setDeleteId(bet.id);
-                    }}
-                    className="mt-2 text-xs text-red-400 hover:text-red-300 transition"
-                  >
-                    Delete
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setDeleteId(bet.id);
+                      }}
+                      className="mt-2 text-xs text-red-400 hover:text-red-300 transition"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -227,7 +231,7 @@ export default function BetsPage() {
                 return (
                   <Link
                     key={bet.id}
-                    href={`/dashboard/bets/${bet.id}`}
+                    href={`/bets/${bet.id}`}
                     className="block bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition"
                   >
                     <div className="flex items-center justify-between mb-1">

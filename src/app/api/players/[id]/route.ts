@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
@@ -9,10 +9,14 @@ export async function DELETE(
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { currentProfileId } = session;
+  if (!currentProfileId) return NextResponse.json({ error: "No profile selected" }, { status: 403 });
+  if (!isAdmin(session)) return NextResponse.json({ error: "Read-only access" }, { status: 403 });
+
   const { id } = await params;
 
   const player = await prisma.player.findUnique({
-    where: { id },
+    where: { id, profileId: currentProfileId },
     include: { betEntries: { select: { id: true }, take: 1 } },
   });
 
