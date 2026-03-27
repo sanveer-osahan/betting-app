@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Profile {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  players   Player[]
+  bets      Bet[]
+  users     User[]
+}
+
 model User {
   id        String   @id @default(cuid())
   username  String   @unique
@@ -14,14 +24,20 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  profileId String?
+  profile   Profile? @relation(fields: [profileId], references: [id])
 }
 
 model Player {
   id         String     @id @default(cuid())
-  name       String     @unique
+  name       String
+  profileId  String
+  profile    Profile    @relation(fields: [profileId], references: [id])
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   betEntries BetEntry[]
+
+  @@unique([name, profileId])
 }
 
 model Bet {
@@ -31,6 +47,8 @@ model Bet {
   matchDate   DateTime
   status      String     @default("open")
   winningTeam String?
+  profileId   String
+  profile     Profile    @relation(fields: [profileId], references: [id])
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   entries     BetEntry[]

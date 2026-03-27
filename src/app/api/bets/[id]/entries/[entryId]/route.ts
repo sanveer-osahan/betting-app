@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function PUT(
@@ -8,6 +8,10 @@ export async function PUT(
 ) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { currentProfileId } = session;
+  if (!currentProfileId) return NextResponse.json({ error: "No profile selected" }, { status: 403 });
+  if (!isAdmin(session)) return NextResponse.json({ error: "Read-only access" }, { status: 403 });
 
   const { id, entryId } = await params;
   const { team, amount } = await req.json();
@@ -28,7 +32,7 @@ export async function PUT(
     include: { bet: true },
   });
 
-  if (!entry || entry.betId !== id) {
+  if (!entry || entry.betId !== id || entry.bet.profileId !== currentProfileId) {
     return NextResponse.json({ error: "Entry not found" }, { status: 404 });
   }
   if (entry.bet.status !== "open") {
@@ -53,6 +57,10 @@ export async function DELETE(
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { currentProfileId } = session;
+  if (!currentProfileId) return NextResponse.json({ error: "No profile selected" }, { status: 403 });
+  if (!isAdmin(session)) return NextResponse.json({ error: "Read-only access" }, { status: 403 });
+
   const { id, entryId } = await params;
 
   const entry = await prisma.betEntry.findUnique({
@@ -60,7 +68,7 @@ export async function DELETE(
     include: { bet: true },
   });
 
-  if (!entry || entry.betId !== id) {
+  if (!entry || entry.betId !== id || entry.bet.profileId !== currentProfileId) {
     return NextResponse.json({ error: "Entry not found" }, { status: 404 });
   }
   if (entry.bet.status !== "open") {

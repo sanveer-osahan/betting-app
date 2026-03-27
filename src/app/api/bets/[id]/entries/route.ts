@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
@@ -9,10 +9,13 @@ export async function GET(
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { currentProfileId } = session;
+  if (!currentProfileId) return NextResponse.json({ error: "No profile selected" }, { status: 403 });
+
   const { id } = await params;
 
   const entries = await prisma.betEntry.findMany({
-    where: { betId: id },
+    where: { betId: id, bet: { profileId: currentProfileId } },
     include: { player: { select: { id: true, name: true } } },
   });
   return NextResponse.json(entries);
@@ -24,6 +27,10 @@ export async function POST(
 ) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { currentProfileId } = session;
+  if (!currentProfileId) return NextResponse.json({ error: "No profile selected" }, { status: 403 });
+  if (!isAdmin(session)) return NextResponse.json({ error: "Read-only access" }, { status: 403 });
 
   const { id } = await params;
   const { playerId, team, amount } = await req.json();
@@ -46,7 +53,7 @@ export async function POST(
     );
   }
 
-  const bet = await prisma.bet.findUnique({ where: { id } });
+  const bet = await prisma.bet.findUnique({ where: { id, profileId: currentProfileId } });
   if (!bet) {
     return NextResponse.json({ error: "Bet not found" }, { status: 404 });
   }
@@ -64,7 +71,9 @@ export async function POST(
     );
   }
 
-  const player = await prisma.player.findUnique({ where: { id: playerId } });
+  const player = await prisma.player.findUnique({
+    where: { id: playerId, profileId: currentProfileId },
+  });
   if (!player) {
     return NextResponse.json({ error: "Player not found" }, { status: 404 });
   }

@@ -4,6 +4,13 @@ export interface Session {
   id: string;
   username: string;
   name: string;
+  isAdmin: boolean;
+  currentProfileId: string | null;
+  currentProfileName: string | null;
+}
+
+export function isAdmin(session: Session): boolean {
+  return session.username === "admin";
 }
 
 export async function getSession(): Promise<Session | null> {
@@ -17,4 +24,3 @@ export async function getSession(): Promise<Session | null> {
     return null;
   }
 }
-
