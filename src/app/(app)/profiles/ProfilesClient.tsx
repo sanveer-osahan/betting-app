@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 
 interface Profile {
   id: string;
@@ -20,7 +19,6 @@ export default function ProfilesClient({
 }: {
   currentProfileId: string | null;
 }) {
-  const router = useRouter();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -120,8 +118,7 @@ export default function ProfilesClient({
     try {
       const res = await fetch(`/api/profiles/${profileId}/switch`, { method: "POST" });
       if (!res.ok) return;
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
     } catch {
       // ignore
     } finally {
