@@ -55,8 +55,12 @@ export default function BetsClient({ isAdmin }: { isAdmin: boolean }) {
     fetchBets();
   }, [fetchBets]);
 
-  const openBets = bets.filter((b) => b.status === "open");
-  const completeBets = bets.filter((b) => b.status === "complete");
+  const openBets = bets
+    .filter((b) => b.status === "open")
+    .sort((a, b) => new Date(a.matchDate).getTime() - new Date(b.matchDate).getTime());
+  const completeBets = bets
+    .filter((b) => b.status === "complete")
+    .sort((a, b) => new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime());
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
